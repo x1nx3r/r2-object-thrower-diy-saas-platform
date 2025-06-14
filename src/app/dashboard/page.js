@@ -10,11 +10,14 @@ import {
   saveR2Credentials as saveR2CredentialsAPI,
   deleteR2Credentials as deleteR2CredentialsAPI,
 } from "@/lib/api/r2-credentials";
+// Add this import at the top
+import DebugConsole from "@/components/debug/DebugConsole";
 
 // Import components
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import UserStats from "@/components/dashboard/UserStats";
 import R2CredentialsManager from "@/components/dashboard/R2CredentialsManager";
+import UploadManager from "@/components/dashboard/UploadManager";
 import AccountInfo from "@/components/dashboard/AccountInfo";
 
 export default function Dashboard() {
@@ -181,12 +184,19 @@ export default function Dashboard() {
         )}
 
         <div className="space-y-8">
+          {/* User Stats */}
           <UserStats
             userProfile={userProfile}
             credentialsCount={r2Credentials.length}
             credentialsLoading={credentialsLoading}
           />
 
+          {/* Upload Manager - Only show if user has credentials */}
+          {!credentialsLoading && r2Credentials.length > 0 && (
+            <UploadManager credentials={r2Credentials} />
+          )}
+
+          {/* R2 Credentials Manager */}
           <R2CredentialsManager
             credentials={r2Credentials}
             loading={credentialsLoading}
@@ -194,9 +204,11 @@ export default function Dashboard() {
             onDelete={handleDeleteCredential}
           />
 
+          {/* Account Information */}
           <AccountInfo user={user} userProfile={userProfile} />
         </div>
       </main>
+      <DebugConsole />
     </div>
   );
 }

@@ -3,22 +3,14 @@ import { doc, collection, getDocs, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { encryptData, decryptData } from "@/lib/encryption";
 import { getAuth } from "firebase-admin/auth";
-import { initializeApp, getApps, cert } from "firebase-admin/app";
-
-// Initialize Firebase Admin (server-side)
-if (!getApps().length) {
-  initializeApp({
-    credential: cert({
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-    }),
-  });
-}
+import { getFirebaseAdmin } from "@/lib/firebase-admin";
 
 // Verify user authentication
 async function verifyAuth(request) {
   try {
+    // Initialize Firebase Admin
+    getFirebaseAdmin();
+
     const authHeader = request.headers.get("authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       throw new Error("No authorization header");
@@ -28,6 +20,7 @@ async function verifyAuth(request) {
     const decodedToken = await getAuth().verifyIdToken(token);
     return decodedToken.uid;
   } catch (error) {
+    console.error("Auth verification error:", error);
     throw new Error("Unauthorized");
   }
 }

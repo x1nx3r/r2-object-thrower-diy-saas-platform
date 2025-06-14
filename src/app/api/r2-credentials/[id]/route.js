@@ -3,10 +3,14 @@ import { doc, getDoc, deleteDoc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { encryptData, decryptData } from "@/lib/encryption";
 import { getAuth } from "firebase-admin/auth";
+import { getFirebaseAdmin } from "@/lib/firebase-admin";
 
 // Verify user authentication
 async function verifyAuth(request) {
   try {
+    // Initialize Firebase Admin
+    getFirebaseAdmin();
+
     const authHeader = request.headers.get("authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       throw new Error("No authorization header");
@@ -16,6 +20,7 @@ async function verifyAuth(request) {
     const decodedToken = await getAuth().verifyIdToken(token);
     return decodedToken.uid;
   } catch (error) {
+    console.error("Auth verification error:", error);
     throw new Error("Unauthorized");
   }
 }
@@ -23,8 +28,8 @@ async function verifyAuth(request) {
 // GET - Get specific credential
 export async function GET(request, { params }) {
   try {
+    const { id: credentialId } = await params;
     const userId = await verifyAuth(request);
-    const credentialId = params.id;
 
     const docRef = doc(db, "users", userId, "r2Credentials", credentialId);
     const docSnap = await getDoc(docRef);
@@ -58,8 +63,8 @@ export async function GET(request, { params }) {
 // DELETE - Delete credential
 export async function DELETE(request, { params }) {
   try {
+    const { id: credentialId } = await params;
     const userId = await verifyAuth(request);
-    const credentialId = params.id;
 
     const docRef = doc(db, "users", userId, "r2Credentials", credentialId);
     await deleteDoc(docRef);
@@ -77,8 +82,8 @@ export async function DELETE(request, { params }) {
 // PUT - Update credential
 export async function PUT(request, { params }) {
   try {
+    const { id: credentialId } = await params;
     const userId = await verifyAuth(request);
-    const credentialId = params.id;
     const credentials = await request.json();
 
     const encryptedData = encryptData(credentials);
