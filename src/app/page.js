@@ -1,3 +1,4 @@
+// src/app/page.js
 "use client";
 
 import { useAuth } from "@/lib/auth-context";
@@ -96,7 +97,7 @@ export default function Home() {
                       clipRule="evenodd"
                     />
                   </svg>
-                  You're signed in!
+                  You&apos;re signed in!
                 </div>
               </div>
               <h1 className="text-5xl md:text-6xl font-bold text-white mb-8 leading-tight">
@@ -183,8 +184,8 @@ export default function Home() {
                 Lightning Fast
               </h3>
               <p className="text-purple-100">
-                Upload files at blazing speeds with Cloudflare's global network.
-                Experience the fastest file transfers.
+                Upload files at blazing speeds with Cloudflare&apos;s global
+                network. Experience the fastest file transfers.
               </p>
             </div>
 

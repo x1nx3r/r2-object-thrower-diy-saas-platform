@@ -36,7 +36,7 @@ export default function AddCredentialForm({ onSubmit, onCancel, isLoading }) {
         return {
           valid: false,
           message:
-            "This doesn't look like an R2 S3 endpoint. It should end with 'r2.cloudflarestorage.com'",
+            "This doesn&apos;t look like an R2 S3 endpoint. It should end with &apos;r2.cloudflarestorage.com&apos;",
         };
       }
 
@@ -255,7 +255,7 @@ export default function AddCredentialForm({ onSubmit, onCancel, isLoading }) {
 
           <p className="text-xs text-gray-500 mt-1">
             Use the S3 API endpoint from your Cloudflare R2 dashboard.
-            <strong>Do not include the bucket name</strong> in the endpoint.
+            <strong> Do not include the bucket name</strong> in the endpoint.
           </p>
         </div>
 
@@ -377,8 +377,8 @@ export default function AddCredentialForm({ onSubmit, onCancel, isLoading }) {
               )}
 
               <p className="text-xs text-blue-600 mt-2">
-                Find this URL in your R2 bucket settings under "Public access" →
-                "Public bucket URL"
+                Find this URL in your R2 bucket settings under &quot;Public
+                access&quot; → &quot;Public bucket URL&quot;
               </p>
             </div>
           )}
@@ -457,8 +457,8 @@ export default function AddCredentialForm({ onSubmit, onCancel, isLoading }) {
               <ul className="text-xs text-orange-700 space-y-1">
                 <li>• Go to Cloudflare R2 dashboard</li>
                 <li>• Select your bucket</li>
-                <li>• Enable "Public access" in Settings</li>
-                <li>• Copy the "Public bucket URL"</li>
+                <li>• Enable &quot;Public access&quot; in Settings</li>
+                <li>• Copy the &quot;Public bucket URL&quot;</li>
               </ul>
             </div>
             <div>
@@ -466,7 +466,7 @@ export default function AddCredentialForm({ onSubmit, onCancel, isLoading }) {
                 2. API Credentials:
               </h6>
               <ul className="text-xs text-orange-700 space-y-1">
-                <li>• Go to "Manage R2 API tokens"</li>
+                <li>• Go to &quot;Manage R2 API tokens&quot;</li>
                 <li>• Create new API token</li>
                 <li>• Copy Access Key ID and Secret</li>
                 <li>• Copy S3 API endpoint</li>

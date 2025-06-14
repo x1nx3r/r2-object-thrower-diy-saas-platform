@@ -262,8 +262,9 @@ export default function CORSConfigurationHelper({ credentials }) {
 
               <div className="mt-3 text-sm text-gray-600">
                 <p>
-                  <strong>Note:</strong> Replace "https://your-domain.com" with
-                  your actual production domain.
+                  <strong>Note:</strong> Replace
+                  &quot;https://your-domain.com&quot; with your actual
+                  production domain.
                 </p>
               </div>
             </div>
@@ -343,7 +344,7 @@ export default function CORSConfigurationHelper({ credentials }) {
               <div className="space-y-3 text-sm text-red-800">
                 <div>
                   <p className="font-medium">
-                    Error: "CORS policy blocked the request"
+                    Error: &quot;CORS policy blocked the request&quot;
                   </p>
                   <p className="text-red-700">
                     → CORS not configured or still propagating. Wait a few
@@ -352,7 +353,7 @@ export default function CORSConfigurationHelper({ credentials }) {
                 </div>
                 <div>
                   <p className="font-medium">
-                    Error: "Access to fetch blocked by CORS policy"
+                    Error: &quot;Access to fetch blocked by CORS policy&quot;
                   </p>
                   <p className="text-red-700">
                     → Your domain is not in AllowedOrigins. Add your domain to
@@ -361,11 +362,11 @@ export default function CORSConfigurationHelper({ credentials }) {
                 </div>
                 <div>
                   <p className="font-medium">
-                    Error: "Method PUT is not allowed by
-                    Access-Control-Allow-Methods"
+                    Error: &quot;Method PUT is not allowed by
+                    Access-Control-Allow-Methods&quot;
                   </p>
                   <p className="text-red-700">
-                    → PUT method not allowed. Make sure "PUT" is in
+                    → PUT method not allowed. Make sure &quot;PUT&quot; is in
                     AllowedMethods.
                   </p>
                 </div>
