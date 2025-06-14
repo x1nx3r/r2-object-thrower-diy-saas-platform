@@ -60,3 +60,33 @@ body {
         transparent 1px
     );
 }
+
+/* Global input styling - Fix white text issue */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="url"],
+textarea,
+select {
+    color: #111827 !important; /* text-gray-900 */
+    background-color: #ffffff !important; /* bg-white */
+}
+
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder,
+input[type="url"]::placeholder,
+textarea::placeholder {
+    color: #6b7280 !important; /* text-gray-500 */
+}
+
+/* Ensure focus states work properly */
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="url"]:focus,
+textarea:focus,
+select:focus {
+    color: #111827 !important; /* text-gray-900 */
+    background-color: #ffffff !important; /* bg-white */
+}

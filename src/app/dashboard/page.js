@@ -1,4 +1,3 @@
-// src/app/dashboard/page.js
 "use client";
 
 import { useAuth } from "@/lib/auth-context";
@@ -6,19 +5,37 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import {
+  fetchR2Credentials,
+  saveR2Credentials as saveR2CredentialsAPI,
+  deleteR2Credentials as deleteR2CredentialsAPI,
+} from "@/lib/api/r2-credentials";
+
+// Import components
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import UserStats from "@/components/dashboard/UserStats";
+import R2CredentialsManager from "@/components/dashboard/R2CredentialsManager";
+import AccountInfo from "@/components/dashboard/AccountInfo";
 
 export default function Dashboard() {
   const { user, logout, loading } = useAuth();
   const router = useRouter();
+
+  // State
   const [userProfile, setUserProfile] = useState(null);
   const [profileLoading, setProfileLoading] = useState(true);
+  const [r2Credentials, setR2Credentials] = useState([]);
+  const [credentialsLoading, setCredentialsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  // Redirect if not authenticated
   useEffect(() => {
     if (!loading && !user) {
-      router.push("/");
+      router.push("/auth");
     }
   }, [user, loading, router]);
 
+  // Fetch user profile
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (user) {
@@ -29,6 +46,7 @@ export default function Dashboard() {
           }
         } catch (error) {
           console.error("Error fetching user profile:", error);
+          setError("Failed to load user profile");
         } finally {
           setProfileLoading(false);
         }
@@ -38,152 +56,145 @@ export default function Dashboard() {
     fetchUserProfile();
   }, [user]);
 
+  // Fetch R2 credentials using API
+  useEffect(() => {
+    const loadR2Credentials = async () => {
+      if (user) {
+        try {
+          setCredentialsLoading(true);
+          const credentials = await fetchR2Credentials();
+          setR2Credentials(credentials);
+          setError(null);
+        } catch (error) {
+          console.error("Error fetching R2 credentials:", error);
+          setError("Failed to load R2 credentials");
+          setR2Credentials([]);
+        } finally {
+          setCredentialsLoading(false);
+        }
+      }
+    };
+
+    loadR2Credentials();
+  }, [user]);
+
+  // Handlers
   const handleLogout = async () => {
     try {
       await logout();
-      router.push("/");
+      router.push("/auth");
     } catch (error) {
       console.error("Logout error:", error);
     }
   };
 
+  const handleAddCredential = async (credentialData) => {
+    try {
+      const savedCredential = await saveR2CredentialsAPI(credentialData);
+      setR2Credentials([...r2Credentials, savedCredential]);
+      setError(null);
+      return savedCredential;
+    } catch (error) {
+      console.error("Error adding credential:", error);
+      setError("Failed to save R2 credentials");
+      throw error;
+    }
+  };
+
+  const handleDeleteCredential = async (credentialId) => {
+    try {
+      await deleteR2CredentialsAPI(credentialId);
+      setR2Credentials(
+        r2Credentials.filter((cred) => cred.id !== credentialId),
+      );
+      setError(null);
+    } catch (error) {
+      console.error("Error deleting credential:", error);
+      setError("Failed to delete R2 credentials");
+      throw error;
+    }
+  };
+
+  // Loading state
   if (loading || profileLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600"></div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-900 via-purple-700 to-blue-800">
+        <div className="relative">
+          <div className="animate-spin rounded-full h-24 w-24 border-4 border-white border-opacity-20"></div>
+          <div className="animate-spin rounded-full h-24 w-24 border-4 border-white border-t-transparent absolute top-0 left-0"></div>
+        </div>
+        <div className="mt-6 text-center">
+          <h2 className="text-2xl font-bold text-white mb-2">DIY R2 Thrower</h2>
+          <p className="text-purple-100 animate-pulse">
+            Loading your dashboard...
+          </p>
+        </div>
       </div>
     );
   }
 
+  // Not authenticated
   if (!user) {
-    return null; // Will redirect to home
+    return null; // Will redirect to auth
   }
 
+  // Main dashboard
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <h1 className="text-2xl font-bold text-gray-900">DIY R2 Thrower</h1>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                {user.photoURL && (
-                  <img
-                    src={user.photoURL}
-                    alt="Profile"
-                    className="w-8 h-8 rounded-full"
-                  />
-                )}
-                <span className="text-gray-700">
-                  {userProfile?.displayName || user.email}
-                </span>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-gray-700 transition"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <DashboardHeader
+        user={user}
+        userProfile={userProfile}
+        onLogout={handleLogout}
+      />
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow-sm p-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">
-            Welcome to your Dashboard! 🎉
-          </h2>
-
-          {/* User Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-purple-50 p-6 rounded-lg border border-purple-200">
-              <h3 className="text-lg font-semibold text-purple-900 mb-2">
-                Plan
-              </h3>
-              <p className="text-2xl font-bold text-purple-600 capitalize">
-                {userProfile?.plan || "Free"}
-              </p>
-            </div>
-
-            <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
-              <h3 className="text-lg font-semibold text-blue-900 mb-2">
-                Total Uploads
-              </h3>
-              <p className="text-2xl font-bold text-blue-600">
-                {userProfile?.totalUploads || 0}
-              </p>
-            </div>
-
-            <div className="bg-green-50 p-6 rounded-lg border border-green-200">
-              <h3 className="text-lg font-semibold text-green-900 mb-2">
-                Storage Used
-              </h3>
-              <p className="text-2xl font-bold text-green-600">
-                {userProfile?.totalStorage
-                  ? `${(userProfile.totalStorage / 1024 / 1024).toFixed(2)} MB`
-                  : "0 MB"}
-              </p>
-            </div>
-          </div>
-
-          {/* User Info */}
-          <div className="bg-gray-50 p-6 rounded-lg">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Account Information
-            </h3>
-            <div className="space-y-2 text-gray-600">
-              <p>
-                <strong>Email:</strong> {user.email}
-              </p>
-              <p>
-                <strong>User ID:</strong> {user.uid}
-              </p>
-              <p>
-                <strong>Member since:</strong>{" "}
-                {userProfile?.createdAt
-                  ? new Date(
-                      userProfile.createdAt.seconds * 1000,
-                    ).toLocaleDateString()
-                  : "Today"}
-              </p>
-              <p>
-                <strong>Last login:</strong>{" "}
-                {userProfile?.lastLogin
-                  ? new Date(
-                      userProfile.lastLogin.seconds * 1000,
-                    ).toLocaleString()
-                  : "Now"}
-              </p>
-            </div>
-          </div>
-
-          {/* Coming Soon */}
-          <div className="mt-8 text-center">
-            <h3 className="text-xl font-semibold text-gray-700 mb-4">
-              🚀 Coming Soon
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-600">
-              <div className="p-4 border rounded-lg">
-                <h4 className="font-medium">📁 Credential Manager</h4>
-                <p className="text-sm">Securely store your R2 credentials</p>
+        {/* Error Banner */}
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-5 w-5 text-red-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
+                </svg>
               </div>
-              <div className="p-4 border rounded-lg">
-                <h4 className="font-medium">☁️ File Uploader</h4>
-                <p className="text-sm">Beautiful drag & drop interface</p>
-              </div>
-              <div className="p-4 border rounded-lg">
-                <h4 className="font-medium">📊 Usage Analytics</h4>
-                <p className="text-sm">Track your storage and usage</p>
-              </div>
-              <div className="p-4 border rounded-lg">
-                <h4 className="font-medium">🔗 File Management</h4>
-                <p className="text-sm">View and manage uploaded files</p>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium">{error}</h3>
+                <div className="mt-2">
+                  <button
+                    onClick={() => setError(null)}
+                    className="text-sm bg-red-100 hover:bg-red-200 px-3 py-1 rounded transition"
+                  >
+                    Dismiss
+                  </button>
+                </div>
               </div>
             </div>
           </div>
+        )}
+
+        <div className="space-y-8">
+          <UserStats
+            userProfile={userProfile}
+            credentialsCount={r2Credentials.length}
+            credentialsLoading={credentialsLoading}
+          />
+
+          <R2CredentialsManager
+            credentials={r2Credentials}
+            loading={credentialsLoading}
+            onAdd={handleAddCredential}
+            onDelete={handleDeleteCredential}
+          />
+
+          <AccountInfo user={user} userProfile={userProfile} />
         </div>
       </main>
     </div>
